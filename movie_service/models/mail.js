@@ -4,7 +4,7 @@ var mail = new mongoose.Schema({
   toUser: String,
   title: String,
   context: String
-});
+}, {timestamps: {createdAt: 'created', updatedAt: 'updated'}});
 mail.statics.findByToUserId = function (user_id, callBack) {
   this.find({toUser: user_id}, callBack);
 }

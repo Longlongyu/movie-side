@@ -4,10 +4,12 @@ var user = require('../models/user');
 var comment = require('../models/comment');
 var movie = require('../models/movie');
 var support = require('../models/support');
+var mail = require('../models/mail');
+var jwt = require('../models/jwtauth');
 var crypto = require('crypto');
 
 const init_token = 'TKL02o';
-const init_key = getRandomString(10);
+const init_sign = getRandomString(10);
 /* POST users listing. */
 router.post('/login', function(req, res, next) {
   if (!req.body.username) {
@@ -19,8 +21,7 @@ router.post('/login', function(req, res, next) {
   user.findUserLogin(req.body.username, getSha256Password(req.body.password), function(err, userLogin) {
     if (userLogin.length != 0) {
       user.findOne({username: req.body.username}, function(err, checkUser) {
-        res.cookie('token', getMD5Password(checkUser._id, init_key), {expires: new Date(Date.now() + 900000), httpOnly: true});
-        res.json({status: 0, message: '登录成功'});
+        res.json({status: 0, message: '登录成功', token: jwt.create(checkUser._id)});
       });
     } else {
       res.json({status: 1, message: '用户不存在或输入错误'});
@@ -69,7 +70,7 @@ router.post('/postComment', function(req, res, next) {
   if (!req.body.context) {
     res.json({status: 1, message: '评论内容为空'});
   }
-  if (req.body.token == getMD5Password(req.body.user_id)) {
+  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
     var saveComment = new comment({
       movie_id: req.body.movie_id,
       username: req.body.username,
@@ -97,7 +98,7 @@ router.post('/support', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名未识别'});
   }
-  if (req.cookies.token != getMD5Password(req.body.user_id, init_key)) {
+  if (!req.header('Authorization') || req.body.user_id != jwt.test(req.header('Authorization')).iss) {
     res.json({status: 1, message: '登录信息未识别'});
   }
   movie.findByMovieId(req.body.movie_id, function(err, supportMovie) {
@@ -112,7 +113,7 @@ router.post('/support', function(req, res, next) {
             if (err) {
               res.json({status: 1, message: err});
             } else {
-              movie.update({_id: req.body.movie_id}, {movieNumSuppose: supportMovie.movieNumSuppose + 1},
+              movie.update({_id: req.body.movie_id}, {movieNumSuppose: supportMovie[0].movieNumSuppose + 1},
               function(err) {
                 if (err) {
                   res.json({status: 1, message: '点赞失败', data: err});
@@ -123,7 +124,7 @@ router.post('/support', function(req, res, next) {
           });
         } else {
           support.remove({movie_id: req.body.movie_id, username: req.body.username}, function(err, delSupport) {
-            movie.update({_id: req.body.movie_id}, {movieNumSuppose: supportMovie.movieNumSuppose - 1},
+            movie.update({_id: req.body.movie_id}, {movieNumSuppose: supportMovie[0].movieNumSuppose - 1},
             function(err) {
               if (err) {
                 res.json({status: 1, message: '取消点赞失败', data: err});
@@ -137,14 +138,14 @@ router.post('/support', function(req, res, next) {
 });
 router.post('/findPassword', function(req, res, next) {
   if (req.body.repassword) {
-    if (req.body.token) {
+    if (req.header('Authorization')) {
       if (!req.body.user_id) {
         res.json({status: 1, message: '用户登录错误'});
       }
       if (!req.body.password) {
         res.json({status: 1, message: '旧密码错误'});
       }
-      if (req.cookies.token != getMD5Password(req.body.user_id, init_key)) {
+      if (req.body.user_id == jwt.test(req.header('Authorization')).iss) {
         user.findOne({_id: req.body.user_id, password: getSha256Password(req.body.password)}, 
           function(err, checkUser) {
             if (checkUser) {
@@ -202,9 +203,6 @@ router.post('/findPassword', function(req, res, next) {
   }
 });
 router.post('/sendEmail', function(req, res, next) {
-  if (!req.cookies.token) {
-    res.json({status: 1, message: '用户登录状态错误'});
-  }
   if (!req.body.user_id) {
     res.json({status: 1, message: '用户登录异常'});
   }
@@ -217,7 +215,7 @@ router.post('/sendEmail', function(req, res, next) {
   if (!req.body.context) {
     res.json({status: 1, message: '内容不能为空'});
   }
-  if (req.cookies.token != getMD5Password(req.body.user_id, init_key)) {
+  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
     user.findByUsername(req.body.toUserName, function(err, toUser) {
       if (toUser.length != 0) {
         var NewEmail = new mail({
@@ -237,6 +235,27 @@ router.post('/sendEmail', function(req, res, next) {
     res.json({status: 1, message: '用户登录错误'})
   }
 });
+router.post('/showEmail', function(req, res, next) {
+  if (!req.body.user_id) {
+    res.json({status: 1, message: '用户登录状态出错'});
+  }
+  if (!req.body.receive) {
+    res.json({status: 1, message: '参数出错'});
+  }
+  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
+    if (req.body.receive == 1) {
+      mail.findByFromUserId(req.body.user_id, function (err, sendEmail) {
+        res.json({status: 0, message: '获取成功', data: sendEmail});
+      }); 
+    } else {
+      mail.findByToUserId(req.body.user_id, function (err, receiveEmail) {
+        res.json({status: 0, message: '获取成功', data: receiveEmail});
+      });
+    }
+  } else {
+    res.json({status: 1, message: '用户登录错误'});
+  }
+});
 router.post('/download', function(req, res, next) {
   if (!req.body.movie_id) {
     res.json({status: 1, message: '电影Id传递失败'});
@@ -252,9 +271,9 @@ router.post('/download', function(req, res, next) {
   });
 });
 
-function getMD5Password(id, token) {
+function getMD5Password(id) {
   var md5 = crypto.createHash('md5');
-  var token_before = id + token;
+  var token_before = id + new Date(Date.now()) + init_sign;
   return md5.update(token_before).digest('hex', 32);
 };
 function getSha256Password(data) {
