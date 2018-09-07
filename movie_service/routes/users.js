@@ -70,7 +70,7 @@ router.post('/postComment', function(req, res, next) {
   if (!req.body.context) {
     res.json({status: 1, message: '评论内容为空'});
   }
-  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
+  if (req.header('Access-Token') && req.body.user_id == jwt.test(req.header('Access-Token')).iss) {
     var saveComment = new comment({
       movie_id: req.body.movie_id,
       username: req.body.username,
@@ -98,7 +98,7 @@ router.post('/support', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名未识别'});
   }
-  if (!req.header('Authorization') || req.body.user_id != jwt.test(req.header('Authorization')).iss) {
+  if (!req.header('Access-Token') || req.body.user_id != jwt.test(req.header('Access-Token')).iss) {
     res.json({status: 1, message: '登录信息未识别'});
   }
   movie.findByMovieId(req.body.movie_id, function(err, supportMovie) {
@@ -138,14 +138,14 @@ router.post('/support', function(req, res, next) {
 });
 router.post('/findPassword', function(req, res, next) {
   if (req.body.repassword) {
-    if (req.header('Authorization')) {
+    if (req.header('Access-Token')) {
       if (!req.body.user_id) {
         res.json({status: 1, message: '用户登录错误'});
       }
       if (!req.body.password) {
         res.json({status: 1, message: '旧密码错误'});
       }
-      if (req.body.user_id == jwt.test(req.header('Authorization')).iss) {
+      if (req.body.user_id == jwt.test(req.header('Access-Token')).iss) {
         user.findOne({_id: req.body.user_id, password: getSha256Password(req.body.password)}, 
           function(err, checkUser) {
             if (checkUser) {
@@ -215,7 +215,7 @@ router.post('/sendEmail', function(req, res, next) {
   if (!req.body.context) {
     res.json({status: 1, message: '内容不能为空'});
   }
-  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
+  if (req.header('Access-Token') && req.body.user_id == jwt.test(req.header('Access-Token')).iss) {
     user.findByUsername(req.body.toUserName, function(err, toUser) {
       if (toUser.length != 0) {
         var NewEmail = new mail({
@@ -242,7 +242,7 @@ router.post('/showEmail', function(req, res, next) {
   if (!req.body.receive) {
     res.json({status: 1, message: '参数出错'});
   }
-  if (req.header('Authorization') && req.body.user_id == jwt.test(req.header('Authorization')).iss) {
+  if (req.header('Access-Token') && req.body.user_id == jwt.test(req.header('Access-Token')).iss) {
     if (req.body.receive == 1) {
       mail.findByFromUserId(req.body.user_id, function (err, sendEmail) {
         res.json({status: 0, message: '获取成功', data: sendEmail});

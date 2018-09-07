@@ -8,7 +8,7 @@ var article = require('../models/article');
 var jwt = require('../models/jwtauth');
 
 router.post('/movieAdd', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.username) {
@@ -30,7 +30,7 @@ router.post('/movieAdd', function(req, res, next) {
     res.json({status: 1, message: '电影下载地址为空'});
   }
   var movieMainPage = req.body.movieMainPage ? req.body.movieMainPage : false;
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function (err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -59,7 +59,7 @@ router.post('/movieAdd', function(req, res, next) {
   }
 });
 router.post('/movieDel', function() {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -71,7 +71,7 @@ router.post('/movieDel', function() {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -87,7 +87,7 @@ router.post('/movieDel', function() {
   }
 });
 router.post('/movieUpdate', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -100,7 +100,7 @@ router.post('/movieUpdate', function(req, res, next) {
     res.json({status: 1, message: '用户名为空'});
   }
   var saveData = req.body.movieInfo;
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -126,7 +126,7 @@ router.get('/commentsList', function(req, res, next) {
   });
 });
 router.post('/checkComment', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -138,7 +138,7 @@ router.post('/checkComment', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -154,7 +154,7 @@ router.post('/checkComment', function(req, res, next) {
   }
 });
 router.post('/stopUser', function (req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -166,7 +166,7 @@ router.post('/stopUser', function (req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -182,7 +182,7 @@ router.post('/stopUser', function (req, res, next) {
   }
 });
 router.post('/changeUser', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -197,7 +197,7 @@ router.post('/changeUser', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -213,7 +213,7 @@ router.post('/changeUser', function(req, res, next) {
   }
 });
 router.post('/showUser', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -222,7 +222,7 @@ router.post('/showUser', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -238,7 +238,7 @@ router.post('/showUser', function(req, res, next) {
   }
 });
 router.post('/powerUpdate', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -250,7 +250,7 @@ router.post('/powerUpdate', function(req, res, next) {
   if (!req.body.username) {
     res.json({status: 1, message: '用户名为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -266,7 +266,7 @@ router.post('/powerUpdate', function(req, res, next) {
   }
 });
 router.post('/addArticle', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -281,7 +281,7 @@ router.post('/addArticle', function(req, res, next) {
   if (!req.body.articleContext) {
     res.json({status: 1, message: '文章内容为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -304,7 +304,7 @@ router.post('/addArticle', function(req, res, next) {
   }
 });
 router.post('/delArticle', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -316,7 +316,7 @@ router.post('/delArticle', function(req, res, next) {
   if (!req.body.article_id) {
     res.json({status: 1, message: '文章id传递失败'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -332,7 +332,7 @@ router.post('/delArticle', function(req, res, next) {
   }
 });
 router.post('/addRecommend', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -350,7 +350,7 @@ router.post('/addRecommend', function(req, res, next) {
   if (!req.body.recommendTitle) {
     res.json({status: 1, message: '推荐标题为空'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
@@ -374,7 +374,7 @@ router.post('/addRecommend', function(req, res, next) {
   }
 });
 router.post('/delRecommend', function(req, res, next) {
-  if (!req.header('Authorization')) {
+  if (!req.header('Access-Token')) {
     res.json({status: 1, message: '登录信息错误'});
   }
   if (!req.body.user_id) {
@@ -386,7 +386,7 @@ router.post('/delRecommend', function(req, res, next) {
   if (!req.body.recommend_id) {
     res.json({status: 1, message: '热点id传递失败'});
   }
-  var check = checkIsOline(req.header('Authorization'), req.body.user_id);
+  var check = checkIsOline(req.header('Access-Token'), req.body.user_id);
   if (check.error == 0) {
     user.findByUsername(req.body.username, function(err, findUser) {
       if (findUser[0].userAdmin && !findUser[0].userStop) {
